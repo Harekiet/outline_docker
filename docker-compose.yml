@@ -1,0 +1,41 @@
+#version: "3"
+
+services:
+  web:
+    restart: always
+    image: nginx:latest
+    ports:
+      - "0.0.0.0:8081:80" # server
+    volumes:
+      - ./www:/var/www
+      - ./log:/var/log/nginx
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - db
+      - php-fpm
+      - php-cron
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: 1
+      MARIADB_DATABASE: wuhu
+      MARIADB_USER: wuhu
+      MARIADB_PASSWORD: wuhu
+    volumes:
+      - ./database:/var/lib/mysql
+
+  php-fpm:
+    build:
+        dockerfile: ./php.DockerFile
+    volumes:
+       - ./www:/var/www
+       - ./php_override.ini:/usr/local/etc/php/conf.d/z_override.ini
+
+  php-cron:
+    build:
+        dockerfile: ./cron.Dockerfile
+
+
+
